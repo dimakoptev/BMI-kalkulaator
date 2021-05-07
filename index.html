@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="et">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kehamassiindeksi kalkulaator</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="p-5 mt-5 mx-auto border border-light rounded shadow">
+            <h1 class="display-4">KMI <small>kalkulaator</small></h1>
+            <div class="mt-4">
+                <span id="weight-indicator" class="badge badge-primary">Kehakaal 50 kg</span>
+                <input id="weight-slider" class="custom-range" type="range" min="1" max="250" step=".1" value="50">
+                <span id="height-indicator" class="badge badge-info">Pikkus 150 cm</span>
+                <input id="height-slider" class="custom-range" type="range" min="1" max="300" step=".5" value="150">
+            </div>
+            <div class="mt-3">
+                <span>Sinu KMI:</span>
+                <span id="bmi-result" class="font-weight-bold">22.22</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/jquery.min.js" type="text/javascript"></script>
+    <script src="js/bootstrap.min.js" type="text/javascript"></script>
+
+    <script>
+        const heightRangeSliderElement = document.getElementById('height-slider');
+        const weightRangeSliderElement = document.getElementById('weight-slider');
+        const heightIndicatorElement = document.getElementById('height-indicator');
+        const weightIndicatorElement = document.getElementById('weight-indicator');
+        const calculationResultElement = document.getElementById('bmi-result');
+
+        reloadRecentValuesFromLocalStorage();
+
+        heightRangeSliderElement.addEventListener('input', handleSliderInput);
+        weightRangeSliderElement.addEventListener('input', handleSliderInput);
+
+        function handleSliderInput() {
+            const currentWeight = parseFloat(weightRangeSliderElement.value);
+            const currentHeight = parseFloat(heightRangeSliderElement.value);
+            const currentBMI = calculateBMI(currentHeight / 100, currentWeight);
+
+            weightIndicatorElement.textContent = `Kehakaal ${currentWeight} kg`;
+            heightIndicatorElement.textContent = `Pikkus ${currentHeight} cm`;
+            calculationResultElement.textContent = currentBMI.toFixed(2);
+
+            persistSelection(currentHeight, currentWeight);
+        }
+
+        function calculateBMI(heightInMeters, weightInKilograms) {
+            return (weightInKilograms / Math.pow(heightInMeters, 2));
+        }
+
+        function reloadRecentValuesFromLocalStorage() {
+            const valuesFromLocalstorage = localStorage.getItem('lastSelectedValues');
+            if (valuesFromLocalstorage !== null) {
+                const { heightSliderValue, weightSliderValue } = JSON.parse(valuesFromLocalstorage);
+                 if (heightSliderValue !== undefined && weightSliderValue !== undefined) {
+                    weightRangeSliderElement.value = weightSliderValue;
+                    heightRangeSliderElement.value = heightSliderValue;
+
+                    heightIndicatorElement.textContent = `Pikkus ${heightSliderValue} cm`;
+                    weightIndicatorElement.textContent = `Kehakaal ${weightSliderValue} kg`;
+                    calculationResultElement.textContent = calculateBMI(heightSliderValue / 100, weightSliderValue).toFixed(2); // Kalkuleerime KMI alati
+                }
+            }
+        }
+
+        function persistSelection(heightSliderValue, weightSliderValue) {
+            localStorage.setItem('lastSelectedValues', JSON.stringify({ weightSliderValue, heightSliderValue }));
+        }
+
+    </script>
+</body>
+
+</html>
